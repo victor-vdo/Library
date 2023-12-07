@@ -1,0 +1,3 @@
+﻿using Library;
+
+Menu.Start();
