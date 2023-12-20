@@ -86,12 +86,13 @@ namespace Library
             Console.WriteLine("Insira o nome do ISBN:");
             var isbn = Console.ReadLine() ?? String.Empty;
             Console.WriteLine("Insira o ano do livro:");
-            var year = Int32.Parse(Console.ReadLine() ?? "0001");
+            var year = Int32.TryParse(Console.ReadLine(), out int numb) ? numb : 1901;
 
             book.Title = title;
             book.Author = author;
             book.ISBN = isbn;
             book.Year = year;
+            book.Active = true;
 
             books.Add(book);
 
