@@ -175,13 +175,37 @@ namespace Library
             var book = new Book(String.Empty, string.Empty, string.Empty, 0001);
             var newBookList = books;
             Console.WriteLine("Selecione uma opção abaixo:");
-            Console.WriteLine("1 - Remover pelo título");
-            Console.WriteLine("2 - Remover pelo autor");
-            Console.WriteLine("3 - Remover pelo ano");
+            Console.WriteLine("1 - Remover pelo ID");
+            Console.WriteLine("2 - Remover pelo título");
+            Console.WriteLine("3 - Remover pelo autor");
+            Console.WriteLine("4 - Remover pelo ano");
             var option = Console.ReadLine();
             switch (option)
             {
                 case "1":
+                    Console.WriteLine("Digite o ID do livro:");
+                    var idString = Console.ReadLine();
+                    Guid.TryParse(idString, out Guid id);
+                    book = SearchById(books, id);
+                    if (book is null)
+                    {
+                        Console.WriteLine("Livro não encontrado no cadastro!");
+                        break;
+                    }
+
+                    newBookList = RemoveBookById(books, id);
+
+                    if (books.Count > newBookList.Count)
+                    {
+                        Console.WriteLine("Livro removido com sucesso!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Não foi possível remover o livro!");
+                        return newBookList;
+                    }
+                    break;
+                case "2":
                     Console.WriteLine("Digite o título do livro:");
                     var title = Console.ReadLine();
 
@@ -205,7 +229,7 @@ namespace Library
                     }
                     break;
 
-                case "2":
+                case "3":
                     Console.WriteLine("Digite o nome do autor:");
                     var author = Console.ReadLine();
                     newBookList.Clear();
@@ -234,7 +258,7 @@ namespace Library
                    
                     break;
 
-                case "3":
+                case "4":
                     Console.WriteLine("Digite o ano:");
                     var year = Int32.TryParse(Console.ReadLine(), out int yr) ? yr : 0;
                     newBookList.Clear();
@@ -348,6 +372,17 @@ namespace Library
                 Console.WriteLine("Não existem livros cadastrados!");
         }
 
+        private static Book SearchById(List<Book> books, Guid id)
+        {
+            if (books.Any())
+            {
+                var book = books.Where(x => x.Id.Equals(id)).FirstOrDefault();
+                return book;
+            }
+            else
+                return null;
+        }
+
         private static Book SearchByTitle(List<Book> books, string title)
         {
             if (books.Any())
@@ -383,7 +418,14 @@ namespace Library
 
         private static List<Book> RemoveBookById(List<Book> books, Guid id)
         {
-           return books = books.Where(b => b.Id.Equals(id)).ToList();
+            foreach (var book in from book in books
+                                 where book.Id.Equals(id)
+                                 select book)
+            {
+                book.Active = false;
+            }
+
+            return books;
         }
 
         private static List<Book> RemoveBookByTitle(List<Book> books, string title)
