@@ -2,7 +2,7 @@
 {
     public class Loan : Model
     {
-        public Loan(Guid userId, Guid bookId, DateTime loanDate)
+        public Loan(Guid userId, Guid bookId, DateTimeOffset loanDate)
         {
             UserId = userId;
             BookId = bookId;
@@ -11,7 +11,7 @@
 
         public Guid UserId { get; set; }
         public Guid BookId { get; set; }
-        public DateTime LoanDate { get; set; }
+        public DateTimeOffset LoanDate { get; set; }
         public bool Active { get; set; }
     }
 }

@@ -1,18 +1,15 @@
-﻿using System;
-using static System.Reflection.Metadata.BlobBuilder;
-using System.Linq;
-
-namespace Library
+﻿namespace Library
 {
     public static class Menu
     {
         public static void Start()
         {
             var books = new List<Book>();
+            var users = new List<User>();
+            var loans = new List<Loan>();
             var book = new Book(string.Empty, string.Empty, string.Empty, DateTime.Now.Year);
             var user = new User(string.Empty, string.Empty);
             var loan = new Loan(user.Id, book.Id, DateTime.Now);
-            var newBookList = new List<Book>();
 
             Console.WriteLine("Bem vindo ao sistema de gerenciamento de biblioteca!");
             while (true)
@@ -24,9 +21,9 @@ namespace Library
                 switch (option) 
                 {
                     case "1":
-                        var isRegistered = BookRegister(book, books);
+                        var isBookRegistered = BookRegister(book, books);
                         Console.Clear();
-                        if (isRegistered)
+                        if (isBookRegistered)
                             Console.WriteLine("Livro cadastrado com sucesso!");
                         else
                             Console.WriteLine("Ocorreu um erro ao tentar cadastrar o livro, tente novamente!");
@@ -54,15 +51,24 @@ namespace Library
                         break;
 
                     case "5":
-                       // UserRegister();
+                        var isUserRegistered = UserRegister(user, users);
+                        if (isUserRegistered)
+                            Console.WriteLine("Usuário cadastrado com sucesso!");
+                        else
+                            Console.WriteLine("Ocorreu um erro ao tentar cadastrar o usuário, tente novamente!");
                         break;
 
                     case "6":
-                        //LoanRegister();
+                        var isLoanRegistered = LoanRegister(loan,loans);
+                        if (isLoanRegistered)
+                            Console.WriteLine("Empréstimo cadastrado com sucesso!");
+                        else
+                            Console.WriteLine("Ocorreu um erro ao tentar cadastrar o empréstimo, tente novamente!");
+
                         break;
 
                     case "7":
-                        //BookReturn();
+                        ShowBookReturn(book, books, loans);
                         break;
 
                     case "8":
@@ -88,6 +94,7 @@ namespace Library
             Console.WriteLine("Insira o ano do livro:");
             var year = Int32.TryParse(Console.ReadLine(), out int numb) ? numb : 1901;
 
+            book.Id = Guid.NewGuid();
             book.Title = title;
             book.Author = author;
             book.ISBN = isbn;
@@ -294,7 +301,64 @@ namespace Library
             return newBookList;
         }
 
+        public static bool UserRegister(User user, List<User> users)
+        {
+            var isRegistred = users.Select(s => s.Id.Equals(user.Id)).FirstOrDefault();
+
+            if (isRegistred)
+                Console.WriteLine("Usuário já cadastrado!");
+            else
+            {
+                Console.WriteLine("Insira o nome do usuário:");
+                var name = Console.ReadLine() ?? String.Empty;
+                Console.WriteLine("Insira o email do usuário:");
+                var email = Console.ReadLine() ?? String.Empty;
+
+                user = new User(name, email)
+                {
+                    Id = Guid.NewGuid(),
+                    Active = true,
+                };
+
+                users.Add(user);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool LoanRegister(Loan loan, List<Loan> loans)
+        {
+            var isRegistred = loans.Select(s => s.Id.Equals(loan.Id)).FirstOrDefault();
+
+            if (isRegistred)
+                Console.WriteLine("Empréstimo já cadastrado!");
+            else
+            {
+                Console.WriteLine("Insira o ID do usuário:");
+                var idUser = Console.ReadLine() ?? String.Empty;
+                Console.WriteLine("Insira o ID do livro:");
+                var idBook = Console.ReadLine() ?? String.Empty;
+                var data = DateTimeOffset.Now.AddDays(7);
+
+                loan = new Loan(
+                    Guid.TryParse(idUser, out Guid userResult) ? userResult : Guid.Empty, 
+                    Guid.TryParse(idBook, out Guid bookResult) ? bookResult : Guid.Empty, 
+                    data)
+                {
+                    Id = Guid.NewGuid(),
+                    Active = true,
+                };
+
+                loans.Add(loan);
+                return true;
+            }
+            return false;
+        }
+
         #region Private methods
+
+        #region Presentation
+
         private static void MainMenu()
         {
             Console.WriteLine("-----------------------------------------------------");
@@ -348,10 +412,10 @@ namespace Library
                     Console.WriteLine("Título = " + book.Title);
                     Console.WriteLine("Autor = " + book.Author);
                     Console.WriteLine("ISBN = " + book.ISBN);
-                } 
+                }
             }
             else
-                Console.WriteLine("Não existem livros cadastrados!"); 
+                Console.WriteLine("Não existem livros cadastrados!");
         }
 
         private static void ShowAllActiveBooks(List<Book> books)
@@ -371,6 +435,28 @@ namespace Library
             else
                 Console.WriteLine("Não existem livros cadastrados!");
         }
+
+        private static void ShowBookReturn(Book book, List<Book> books, List<Loan> loans)
+        {
+            Console.WriteLine("Insira o ID do livro:");
+            var idBook = Console.ReadLine() ?? String.Empty;
+
+            book = SearchById(books, Guid.TryParse(idBook, out Guid bookResult) ? bookResult : Guid.Empty);
+            
+            if(book is null)
+                Console.WriteLine("Livro não encontrado na base!");
+            
+            var isReturned = BookReturn(book, loans);
+
+            if(isReturned)
+                Console.WriteLine("Livro devolvido com sucesso!");
+            else
+                Console.WriteLine("Houve um erro ao tentar devolver o livro!");
+        }
+
+        #endregion
+
+        #region Data Access
 
         private static Book SearchById(List<Book> books, Guid id)
         {
@@ -467,6 +553,25 @@ namespace Library
             //return books = books.Where(b => b.Year.Equals(year)).ToList();
         }
 
+        private static bool BookReturn(Book book, List<Loan> loans)
+        {
+            var isRegistred = loans.Select(s => s.BookId.Equals(book.Id)).FirstOrDefault();
+
+            if (!isRegistred)
+            {
+                Console.WriteLine("Livro não encontrado na base!");
+                return false;
+            }
+            else
+            {
+                loans.Where(loan => loan.BookId.Equals(book.Id))
+                   .ToList()
+                   .ForEach(loan => loan.Active = false);
+                return true;
+            }
+        }
+
+        #endregion
         public static bool ConfirmAction()
         {
             Console.WriteLine("Confirma essa ação?");
@@ -489,6 +594,7 @@ namespace Library
 
             return false;
         }
+       
         #endregion
     }
 }
