@@ -594,7 +594,66 @@
 
             return false;
         }
-       
+
+        #endregion
+
+        #region Classes
+
+        public abstract class Model
+        {
+            public Guid Id { get; set; }
+            public Model()
+            {
+                Id = Guid.NewGuid();
+            }
+        }
+
+        public class User : Model
+        {
+            public User(string name, string email)
+            {
+                Name = name;
+                Email = email;
+            }
+
+            public string Name { get; set; }
+            public string Email { get; set; }
+            public bool Active { get; set; }
+        }
+
+        public class Loan : Model
+        {
+            public Loan(Guid userId, Guid bookId, DateTimeOffset loanDate)
+            {
+                UserId = userId;
+                BookId = bookId;
+                LoanDate = loanDate;
+            }
+
+            public Guid UserId { get; set; }
+            public Guid BookId { get; set; }
+            public DateTimeOffset LoanDate { get; set; }
+            public bool Active { get; set; }
+        }
+
+        public class Book : Model
+        {
+            public Book(string title, string author, string iSBN, int year)
+            {
+                Title = title;
+                Author = author;
+                ISBN = iSBN;
+                Year = year;
+            }
+
+            public string Title { get; set; }
+            public string Author { get; set; }
+            public string ISBN { get; set; }
+            public int Year { get; set; }
+            public bool Active { get; set; }
+        }
+
+
         #endregion
     }
 }
