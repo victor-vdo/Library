@@ -1,23 +1,14 @@
 ### Project: Book/Library Management System
 - Develop a Book/Library Management System, where it will be possible:
    - Register a Book
-
    - Validate Data 
-
    - Consult All Books
-
    - Consult a Book
-
    - Remove a Book
-
    - Register a User
-
    - Register a Loan
-
    - Register Return Date
-
    - Return a Book
-
    - Send Message Days Late (If Any) or If Up to Date
  
 - Entities and Data
