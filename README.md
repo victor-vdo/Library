@@ -1,4 +1,4 @@
-### Project: Book/Library Management System
+### Project: Book/Library Management Console System
 - Develop a Book/Library Management System, where it will be possible:
    - Register a Book
    - Validate Data 
