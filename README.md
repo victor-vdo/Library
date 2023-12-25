@@ -2,7 +2,7 @@
 - Develop a Book/Library Management System, where it will be possible:
    - Register a Book
 
-   - Validate Data (PLUS 1)
+   - Validate Data 
 
    - Consult All Books
 
